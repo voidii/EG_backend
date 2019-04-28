@@ -1,3 +1,4 @@
 module.exports = {
-    jwtSecret : 'Shhh! this is my secret'
+    jwtSecret : 'Long Live Eternal Garden Club !!!',
+    hash_rounds : 9
 }
