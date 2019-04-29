@@ -3,11 +3,37 @@ const passport = require('passport');
 const bodyParser = require("body-parser") //parsing http post body
 const app = express()
 require('./configs/passport')
+const port = require("./configs/web_configs").port
+const http_protocol = require('./configs/web_configs').http_protocol
+var http_redirect_server = null
+//var http_protocol = 'https'
 
-//this is just enable CORS for the server
-const cors = require('cors') // CORS
-app.use(cors({credentials: true, origin: true}))
-const port = 3000
+if(http_protocol == 'http'){
+  var http = require('http')
+  var httpServer = http.createServer(app);
+}
+else if (http_protocol == 'https'){
+  var https = require('https')
+  const https_credential = require('./configs/web_configs').https_credential
+  var httpServer = https.createServer(https_credential, app)
+  //redirect any http request to https request
+  app1 = new express()
+  app1.get('/', function(req, res) {
+    res.sendFile(path.join(__dirname + '/redirect.html'));
+});
+  app1.listen(80, function(){'redirect server running on 80 port'})
+}
+if(!(process.env.NODE_ENV === "production" || process.env.NODE_ENV === "test")){
+  console.log("in test mode, enable CORS")
+  //this is just enable CORS for the server
+  const cors = require('cors') // CORS
+  app.use(cors({credentials: true, origin: true}))
+}
+// else{
+//   app.use(express.static('public'));
+// }
+app.use(express.static('public'));
+
 //cookie parser:
 var cookieParser = require('cookie-parser');
 app.use(cookieParser());
@@ -17,30 +43,8 @@ app.use(bodyParser())
 const auth = require('./routes/auth');
 app.use('/auth', auth);
 
+app.use('/user', passport.authenticate('jwt', {session: false}));
+const user = require('./routes/user');
+app.use('/user', user);
 
-
-// app.post('/login', function(req, res, next) {
-//  // Handle the post for this route
-//  info = req.body;
-//  //doing a fake varification here
-//  if(info.email==="123@123.com" && info.password ==="123")
-//  {
-//    //set cookie that expire for 7 days
-//    //res.cookie('username', '123', {expire : new Date() + 7 * 24 * 60 * 60 * 1000}).json({status:'success'});
-//    res.cookie('username', '123').json({status:'success'});
-//  }
-//  else
-//  {
-//    res.send(403).json({status:'fail'});
-//  }
-//  //fake verification done
-//
-//  next();
-// });
-
-
-app.get('/home', passport.authenticate('jwt', {session: false}), function(req, res, next){
-    res.send(req.user)
-})
-
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+httpServer.listen(port, () => console.log(`App listening on port ${port}!`))

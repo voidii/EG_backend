@@ -5,17 +5,22 @@ const LocalStrategy = require('passport-local').Strategy;
 const JWTStrategy   = passportJWT.Strategy;
 const ExtractJWT = passportJWT.ExtractJwt;
 const secret = require("./app_configs").jwtSecret;
-//this one is typically a DB call. you need to implement correct findOne method
+
+user_handler = require("../db/user_handler")
+verify_hash = require("../utils/hash").verify_hash
 function findOne(email, password){
   return new Promise(function(resolve, reject){
-
-    if (email==="123@123.com" && password ==="123"){
-      user = '123'
-      resolve('123')
-    }
-    else{
-      resolve(null)
-    }
+    user_handler.find_user_by_email(email).then(user =>{
+      if (user){
+          verify_hash(password, user.password).then((result)=>{
+            if(result) resolve(user.userid)
+            else resolve(null)
+          })
+      }
+      else{
+        resolve(null)
+      }
+    })
   })
 }
 
@@ -43,7 +48,6 @@ passport.use(new JWTStrategy({
         secretOrKey   : secret
     },
     function (jwtPayload, done) {
-
         //find the user in db if needed
         if (Date.now() > jwtPayload.expires) {
         return done('jwt expired');

@@ -1,5 +1,5 @@
 db = require('./db_handler')
-hash_password = require('../util/hash').hash_password
+hash_password = require('../utils/hash').hash_password
 
 function username_exists(username){
   sql = `SELECT EXISTS(SELECT 1 FROM users WHERE username="${username}" LIMIT 1)`
@@ -30,8 +30,8 @@ function email_exists(email){
   })
 }
 
-function insert_user(user_form){
-  //this function is for insert normal user, for admin, employee or VIP, insert them as normal user and promote them later
+function insert_user_(user_form){
+  //IMPORTANT: this function is a private function for inserting user, we need to insert salty password, so use insert_user instead
   sql = `INSERT INTO users (username, email, password) VALUES("${user_form.username}", "${user_form.email}", "${user_form.password}")`
   console.log(sql)
   return new Promise ((resolve, reject) =>{
@@ -40,6 +40,20 @@ function insert_user(user_form){
         console.log(err)
       }
       else resolve()
+    })
+  })
+}
+function insert_user(user_form){
+  return new Promise((resolve, reject) =>  {
+    hash_password(user_form.password).then(hashed_password =>{
+      console.log("hashed password: "+hashed_password)
+      user_form.password = hashed_password
+      return insert_user_(user_form)
+    }).then(()=>{
+      console.log("created a new user successfully!")
+      resolve()
+    }).catch((err)=>{
+      reject(err)
     })
   })
 }
