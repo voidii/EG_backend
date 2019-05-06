@@ -15,6 +15,18 @@ function username_exists(username){
   })
 }
 
+function get_all_employees(){
+  sql = `SELECT * from employees`
+  console.log(sql)
+  return new Promise((resolve,reject)=>{
+    db.all(sql ,(err, rows) =>{
+      if(err) reject(err);
+      //this is just getting the actual query by dumping key
+      else resolve(rows)
+    })
+  })
+}
+
 function email_exists(email){
   sql = `SELECT EXISTS(SELECT 1 FROM users WHERE email="${email}" LIMIT 1)`
   //sql = "SELECT "+query
@@ -58,6 +70,21 @@ function insert_user(user_form){
   })
 }
 
+function get_user_balance(userid){
+  sql = `SELECT * FROM users WHERE userid=${userid}`
+  console.log(sql)
+  return new Promise((resolve, reject) =>{
+    db.get(sql, [], (err, row)=>{
+      if (err){
+        console.log("error "+err)
+        reject(err)
+      }
+      else{
+        resolve(row.balance)
+      }
+    })
+  })
+}
 function find_user_by_username(username){
   sql = `SELECT * FROM users WHERE username="${username}"`
   console.log(sql)
@@ -106,11 +133,25 @@ function find_user_by_userid(userid){
   })
 }
 
+function update_balance(userid, balance){
+  sql = `UPDATE users SET balance = ${balance} WHERE userid=${userid}`
+  console.log(sql)
+  return new Promise((resolve, reject)=>{
+    db.run(sql, (err)=>{
+      if (err) {console.log(err); reject(err)}
+      resolve()
+    })
+  })
+}
+
 module.exports = {
   username_exists,
   email_exists,
   insert_user,
   find_user_by_username,
   find_user_by_email,
-  find_user_by_userid
+  find_user_by_userid,
+  update_balance,
+  get_user_balance,
+  get_all_employees
 }

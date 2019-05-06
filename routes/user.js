@@ -21,5 +21,11 @@ router.get('/user_profile', function(req,res){
   }).catch((err)=>res.status(400).send(err))
 })
 
+router.get('/balance', function(req,res){
+  user_handler.get_user_balance(req.user).then((row)=>{
+    res.send({balance:row})
+  }).catch((err)=>res.status(400).send(err))
+})
+
 
 module.exports = router;

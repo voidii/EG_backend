@@ -47,4 +47,15 @@ app.use('/user', passport.authenticate('jwt', {session: false}));
 const user = require('./routes/user');
 app.use('/user', user);
 
+
+app.use('/gift', passport.authenticate('jwt', {session: false}));
+const gift = require('./routes/gifts');
+app.use('/gift', gift);
+
+const gift_history = require('./routes/gift_history');
+app.use("/gift_history", gift_history)
+
+const employees = require('./routes/employees');
+app.use("/employees", employees)
+
 httpServer.listen(port, () => console.log(`App listening on port ${port}!`))
