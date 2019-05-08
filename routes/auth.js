@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const passport = require("passport");
 const secret = require("../configs/app_configs").jwtSecret;
 const user_handler = require('../db/user_handler')
-
+const email_handler = require('../utils/email/email_handler')
 var cookieParser = require('cookie-parser');
 router.use(cookieParser());
 //use cookie parser to save login information on frontend
@@ -62,7 +62,9 @@ router.post('/register', function(req,res){
       return {then: function() {}}; //a trick for jumping out of promise chain
     }
     else return user_handler.insert_user(user_form)
-  }).then(()=>{res.send('success')})
+  }).then(()=>{
+    email_handler.send_welcome_email(user_form.email, user_form.username).then(()=>{}).catch(err=>{console.log(err)})
+    res.send('success')})
 })
 
 module.exports = router;

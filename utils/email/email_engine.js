@@ -13,7 +13,7 @@ var smtpTransport = mailer.createTransport({
 
 send_email = function(to_adress, subject, text_content, html_content){
   let mail = {
-    from: `Rusheng Zhang <${email_address}>`,
+    from: `Eternal Garden Club <${email_address}>`,
     to: to_adress,
     subject: subject,
     text: text_content,
@@ -31,6 +31,5 @@ send_email = function(to_adress, subject, text_content, html_content){
         }
     });
   })
-
 }
 module.exports = {send_email}
