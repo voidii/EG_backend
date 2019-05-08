@@ -43,7 +43,7 @@ function email_exists(email){
 }
 
 function insert_user_(user_form){
-  //IMPORTANT: this function is a private function for inserting user, we need to insert salty password, so use insert_user instead
+  //IMPORTANT: this function is a private function for inserting user without modifying the password field, in production, we need to insert salty password, so use insert_user instead
   sql = `INSERT INTO users (username, email, password) VALUES("${user_form.username}", "${user_form.email}", "${user_form.password}")`
   console.log(sql)
   return new Promise ((resolve, reject) =>{
@@ -101,6 +101,8 @@ function find_user_by_username(username){
   })
 }
 
+
+
 function find_user_by_email(email){
   sql = `SELECT * FROM users WHERE email="${email}"`
   console.log(sql)
@@ -133,6 +135,34 @@ function find_user_by_userid(userid){
   })
 }
 
+function find_employee_by_id(employeeid){
+  sql = `SELECT * FROM employees WHERE employeeid="${employeeid}"`
+  console.log(sql)
+  return new Promise((resolve, reject)=>{
+    db.get(sql, (err, row)=>{
+      if (err){
+        console.log('error'+err)
+        reject(err)
+      }
+      else{
+        resolve(row)
+      }
+    })
+  })
+}
+
+
+function employee_update_popularity(employeeid, increment){
+  sql = `UPDATE employees SET popularity = popularity + ${increment} WHERE employeeid=${employeeid}`
+  console.log(sql)
+  return new Promise((resolve, reject)=>{
+    db.run(sql, (err)=>{
+      if (err) {console.log(err); reject(err)}
+      resolve()
+    })
+  })
+}
+
 function update_balance(userid, balance){
   sql = `UPDATE users SET balance = ${balance} WHERE userid=${userid}`
   console.log(sql)
@@ -153,5 +183,7 @@ module.exports = {
   find_user_by_userid,
   update_balance,
   get_user_balance,
-  get_all_employees
+  get_all_employees,
+  find_employee_by_id,
+  employee_update_popularity
 }

@@ -1,4 +1,5 @@
 db = require('./db_handler')
+
 const user_handler = require('./user_handler')
 
 function get_all_gift_histories(start_idx, end_idx){
@@ -49,6 +50,22 @@ function get_gift_price(giftid){
       }
       else{
         resolve(row.price)
+      }
+    })
+  })
+}
+
+function find_gift_by_id(giftid){
+  sql = `SELECT * FROM gifts WHERE giftid="${giftid}"`
+  console.log(sql)
+  return new Promise((resolve, reject)=>{
+    db.get(sql, (err, row)=>{
+      if (err){
+        console.log('error'+err)
+        reject(err)
+      }
+      else{
+        resolve(row)
       }
     })
   })
@@ -119,13 +136,22 @@ function insert_gift_history(userid, giftid, to_id, message){
     })
   })
 }
+function employee_update_popularity_of_gift(employeeid, giftid){
+  return new Promise((resolve, reject)=>{
+    find_gift_by_id(giftid).then((gift)=>{
+      user_handler.employee_update_popularity(employeeid, gift.popularity).then(resolve).catch(err => reject(err))
+    }).catch(err=>{console.log(err);reject(err)})
+  })
+}
 
-
-function send_gift(userid, giftid, to_id, message){
+function send_gift(userid, to_id, giftid, message){
+  //console.log("userid:"+userid+" to_id:"+to_id+" gift_id:"+giftid)
   return new Promise ((resolve, reject)=>{
     check_and_update_balance_enough_for_gift(userid, giftid).then((valid)=>{
       if (valid){
-        insert_gift_history(userid, giftid, to_id, message).then(resolve).catch(err=>{reject(err)})
+        send_gift_on_discord = require("../utils/discord/discord_gift_handler").send_gift_on_discord
+        send_gift_on_discord(userid, to_id, giftid, message)
+        Promise.all([insert_gift_history(userid, giftid, to_id, message),employee_update_popularity_of_gift(to_id, giftid)]).then(()=>{resolve()}).catch(err=>{console.log(err);reject(err)})
       }
       else {
         console.log("no enough balance")
@@ -143,5 +169,6 @@ module.exports = {
   get_all_gift_histories,
   send_gift,
   get_number_of_history,
-  get_all_gifts
+  get_all_gifts,
+  find_gift_by_id
 }

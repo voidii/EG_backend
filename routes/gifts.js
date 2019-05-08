@@ -21,7 +21,7 @@ router.post('/send_gift', (req,res)=>{
   let to_id = gift_info.to_id
   let message = gift_info.message
   console.log(gift_info)
-  gift_handler.send_gift(userid, giftid, to_id, message).then(()=>{res.send({status: 'success'})}).catch((err)=>{
+  gift_handler.send_gift(userid,to_id, giftid,  message).then(()=>{res.send({status: 'success'})}).catch((err)=>{
     if (err.info =="not enough balance")
       res.status(402).send("not enough balance")
     else res.status(400).send(err)

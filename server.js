@@ -3,6 +3,7 @@ const passport = require('passport');
 const bodyParser = require("body-parser") //parsing http post body
 const app = express()
 require('./configs/passport')
+require("./utils/discord/discord_engine")//need to init the engine from start
 const port = require("./configs/web_configs").port
 const http_protocol = require('./configs/web_configs').http_protocol
 var http_redirect_server = null
